@@ -1,0 +1,113 @@
+# Added RDSInstance from rds-starter.yaml
+# 4
+# 6/9/2026
+
+
+
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  CloudFormation template that creates an AWS VPC in the US-West-2 Region
+  spanning three Availability Zones.
+
+# Parameter used to customize the VPC name with the student's ECPI ID.
+Parameters:
+  StudentID:
+    Type: String
+    Description: Enter your unique ECPI student ID.
+    Default: studentID
+
+# Resources section creates the VPC and three subnets across three Availability Zones.
+Resources:
+
+  # Creates the main Virtual Private Cloud.
+  StudentVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Sub: VPC-${StudentID}
+
+  # Creates a subnet in the first US-West-2 Availability Zone.
+  PublicSubnetAZ1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: StudentVPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: us-west-2a
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Sub: VPC-${StudentID}-Subnet-us-west-2a
+
+  # Creates a subnet in the second US-West-2 Availability Zone.
+  PublicSubnetAZ2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: StudentVPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: us-west-2b
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Sub: VPC-${StudentID}-Subnet-us-west-2b
+
+  # Creates a subnet in the third US-West-2 Availability Zone.
+  PublicSubnetAZ3:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId:
+        Ref: StudentVPC
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: us-west-2c
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Sub: VPC-${StudentID}-Subnet-us-west-2c
+
+  RdsInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      VPCSecurityGroups:
+      - <sg-06336346541ec3f66>
+      AllocatedStorage: '5'
+      DBInstanceClass: db.t3.micro
+      DBInstanceIdentifier: playground-db
+      Engine: MySQL
+      MasterUsername: Admin
+      MasterUserPassword: CloudAcademy123!
+
+# Outputs show useful information after stack creation.
+Outputs:
+  VPCId:
+    Description: The ID of the created VPC.
+    Value:
+      Ref: StudentVPC
+
+  VPCName:
+    Description: The name assigned to the VPC.
+    Value:
+      Fn::Sub: VPC-${StudentID}
+
+  SubnetAZ1:
+    Description: Subnet created in us-west-2a.
+    Value:
+      Ref: PublicSubnetAZ1
+
+  SubnetAZ2:
+    Description: Subnet created in us-west-2b.
+    Value:
+      Ref: PublicSubnetAZ2
+
+  SubnetAZ3:
+    Description: Subnet created in us-west-2c.
+    Value:
+      Ref: PublicSubnetAZ3
